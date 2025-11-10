@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ControlSwitch : MonoBehaviour {
+public class ControlSwitch : MonoBehaviour
+{
 
 	public KeyCode toggleKey = KeyCode.C;
 	public GameObject manualController;
@@ -12,15 +13,15 @@ public class ControlSwitch : MonoBehaviour {
 
 	void Awake()
 	{
-		Application.targetFrameRate = 60;
-		useAutomaticControl = HasCommandLineArgument (automaticControlDefaultCMDLineArgument);
-		SetControllerState (true);
+		useAutomaticControl = HasCommandLineArgument(automaticControlDefaultCMDLineArgument);
+		SetControllerState(true);
 	}
 
 	void Update()
 	{
-		if (Input.GetKeyDown (toggleKey)) {
-			Toggle ();
+		if (Input.GetKeyDown(toggleKey))
+		{
+			Toggle();
 		}
 	}
 
@@ -32,14 +33,15 @@ public class ControlSwitch : MonoBehaviour {
 
 	void SetControllerState(bool useAutomaticControl)
 	{
-		manualController.SetActive (!useAutomaticControl);
-		automaticController.SetActive (useAutomaticControl);
+		manualController.SetActive(!useAutomaticControl);
+		automaticController.SetActive(useAutomaticControl);
 	}
 
 	bool HasCommandLineArgument(string argument)
 	{
-		string[] passedArguments = System.Environment.GetCommandLineArgs ();
-		foreach (string passedArgument in passedArguments) {
+		string[] passedArguments = System.Environment.GetCommandLineArgs();
+		foreach (string passedArgument in passedArguments)
+		{
 			if (passedArgument.Equals(argument))
 				return true;
 		}
