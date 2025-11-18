@@ -21,6 +21,8 @@ public class PlayerMovement : MonoBehaviour
     private readonly string ANIMATION_SAILING = "IsSailing";
     private readonly string ANIMATION_JUMPING = "IsJumping";
     private readonly string ANIMATION_IDLE = "IsIdle";
+    private readonly string ANIMATION_IS_FALLING = "IsFalling";
+    private readonly string ANIMATION_IS_GROUNDED = "IsGrounded";
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -39,29 +41,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 moveDirection = new Vector3(horizontalInput, 0, verticalInput);
         float inputMagnitude = moveDirection.magnitude;
 
-
-        // animator.SetFloat("InputMagnitude", inputMagnitude, 0.05f, Time.deltaTime);
-        if (Input.GetKey(KeyCode.Mouse0))
-        {
-            animator.SetBool(ANIMATION_ATTACK, true);
-        }
-        else
-        {
-            animator.SetBool(ANIMATION_ATTACK, false);
-        }
-
-        if (Input.GetKey(KeyCode.Mouse1))
-        {
-            animator.SetBool(ANIMATION_DEFEND, true);
-        }
-        else
-        {
-            animator.SetBool(ANIMATION_DEFEND, false);
-        }
-
-        Debug.Log("ANIMATION_ATTACK " + animator.GetBool(ANIMATION_ATTACK));
-
-
+        moveDirection.Normalize();
 
 
 
@@ -69,12 +49,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (characterController.isGrounded)
         {
-            yGravity = -0.1f;
-            // animator.SetBool(ANIMATION_IDLE, true);
+            yGravity = -0.5f;
+            animator.SetBool(ANIMATION_IS_GROUNDED, true);
             isGrounded = true;
             animator.SetBool(ANIMATION_JUMPING, false);
             isJumping = false;
-            // animator.SetBool("IsFalling", false);
+            animator.SetBool(ANIMATION_IS_FALLING, false);
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -85,20 +65,20 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            // animator.SetBool(ANIMATION_IDLE, false);
+            animator.SetBool(ANIMATION_IS_GROUNDED, false);
             isGrounded = false;
 
             if ((isJumping && yGravity < 0) || yGravity < -3.5f)
             {
-                // animator.SetBool("IsFalling", true);
+                animator.SetBool(ANIMATION_IS_FALLING, true);
             }
         }
+
 
 
         if (moveDirection != Vector3.zero)
         {
             animator.SetBool(ANIMATION_RUNNING, true);
-            // animator.SetBool(ANIMATION_IDLE, false);
             Quaternion toRotation = Quaternion.LookRotation(moveDirection,
                 Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation,
@@ -107,14 +87,11 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             animator.SetBool(ANIMATION_RUNNING, false);
-            // animator.SetBool(ANIMATION_IDLE, true);
-
         }
 
         if (!isGrounded)
         {
-            // Vector3 velocity = moveDirection * inputMagnitude * jumpHeight;
-            Vector3 velocity = moveDirection * jumpHeight;
+            Vector3 velocity = moveDirection * inputMagnitude * jumpHeight;
             velocity.y = yGravity;
             characterController.Move(velocity * Time.deltaTime);
         }
