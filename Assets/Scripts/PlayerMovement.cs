@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -8,9 +9,10 @@ public class PlayerMovement : MonoBehaviour
     public float rotationMaxDegree;
     public float jumpHeight;
 
-    private float yGravity;
+    public float yGravity;
     private bool isJumping;
     private bool isGrounded;
+    private bool jumpRequested;
 
     private readonly string ANIMATION_CHOPPING = "IsChopping";
     private readonly string ANIMATION_ATTACK = "IsAttack";
@@ -20,10 +22,13 @@ public class PlayerMovement : MonoBehaviour
     private readonly string ANIMATION_RUNNING = "IsRun";
     private readonly string ANIMATION_SAILING = "IsSailing";
     private readonly string ANIMATION_JUMPING = "IsJumping";
-    private readonly string ANIMATION_IDLE = "IsIdle";
     private readonly string ANIMATION_IS_FALLING = "IsFalling";
     private readonly string ANIMATION_IS_GROUNDED = "IsGrounded";
 
+    private Vector2 turn;
+    public float sensitivity = 0.5f;
+    public Vector3 deltaMove;
+    public float speed = 1;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -39,17 +44,77 @@ public class PlayerMovement : MonoBehaviour
         float verticalInput = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = new Vector3(horizontalInput, 0, verticalInput);
-        float inputMagnitude = moveDirection.magnitude;
+
 
         moveDirection.Normalize();
 
+        Run(moveDirection);
+        Jump(moveDirection);
+        TurnAround(moveDirection);
+        Attack();
+        Defend();
+    }
 
 
+
+    private void TurnAround(Vector3 turnDirection)
+    {
+
+
+        if (turnDirection != Vector3.zero)
+        {
+            Quaternion toRotation = Quaternion.LookRotation(turnDirection,
+                Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation,
+                toRotation, rotationMaxDegree * Time.deltaTime);
+        }
+    }
+
+    private void Attack()
+    {
+        // Attack
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            animator.SetBool(ANIMATION_ATTACK, true);
+        }
+        else
+        {
+            animator.SetBool(ANIMATION_ATTACK, false);
+        }
+    }
+
+    private void Defend()
+    {
+        //Defend
+        if (Input.GetKey(KeyCode.Mouse1))
+        {
+            animator.SetBool(ANIMATION_DEFEND, true);
+        }
+        else
+        {
+            animator.SetBool(ANIMATION_DEFEND, false);
+        }
+    }
+
+    private void Run(Vector3 moveDirection)
+    {
+        if (moveDirection != Vector3.zero)
+        {
+            animator.SetBool(ANIMATION_RUNNING, true);
+        }
+        else
+        {
+            animator.SetBool(ANIMATION_RUNNING, false);
+        }
+    }
+
+    private void Jump(Vector3 moveDirection)
+    {
         yGravity += Physics.gravity.y * Time.deltaTime;
-
         if (characterController.isGrounded)
         {
-            yGravity = -0.5f;
+
+            yGravity = -0.1f;
             animator.SetBool(ANIMATION_IS_GROUNDED, true);
             isGrounded = true;
             animator.SetBool(ANIMATION_JUMPING, false);
@@ -58,9 +123,10 @@ public class PlayerMovement : MonoBehaviour
 
             if (Input.GetButtonDown("Jump"))
             {
+                // Set animation first - animator will process this before LateUpdate
                 animator.SetBool(ANIMATION_JUMPING, true);
-                yGravity = jumpHeight;
                 isJumping = true;
+                yGravity = jumpHeight;
             }
         }
         else
@@ -68,30 +134,18 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool(ANIMATION_IS_GROUNDED, false);
             isGrounded = false;
 
-            if ((isJumping && yGravity < 0) || yGravity < -3.5f)
+
+            bool isFallFromSky = isJumping && yGravity < 0;
+            bool isFallFromGrounding = yGravity < -4f;
+            if (isFallFromGrounding || isFallFromSky)
             {
                 animator.SetBool(ANIMATION_IS_FALLING, true);
             }
         }
 
-
-
-        if (moveDirection != Vector3.zero)
-        {
-            animator.SetBool(ANIMATION_RUNNING, true);
-            Quaternion toRotation = Quaternion.LookRotation(moveDirection,
-                Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation,
-                toRotation, rotationMaxDegree * Time.deltaTime);
-        }
-        else
-        {
-            animator.SetBool(ANIMATION_RUNNING, false);
-        }
-
         if (!isGrounded)
         {
-            Vector3 velocity = moveDirection * inputMagnitude * jumpHeight;
+            Vector3 velocity = moveDirection * jumpHeight;
             velocity.y = yGravity;
             characterController.Move(velocity * Time.deltaTime);
         }
