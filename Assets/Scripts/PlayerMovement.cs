@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -12,7 +13,6 @@ public class PlayerMovement : MonoBehaviour
     public float yGravity;
     private bool isJumping;
     private bool isGrounded;
-    private bool jumpRequested;
 
     private readonly string ANIMATION_CHOPPING = "IsChopping";
     private readonly string ANIMATION_ATTACK = "IsAttack";
@@ -25,10 +25,13 @@ public class PlayerMovement : MonoBehaviour
     private readonly string ANIMATION_IS_FALLING = "IsFalling";
     private readonly string ANIMATION_IS_GROUNDED = "IsGrounded";
 
+    public AnimationClip jumpClip;
+
     private Vector2 turn;
     public float sensitivity = 0.5f;
     public Vector3 deltaMove;
     public float speed = 1;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -111,8 +114,16 @@ public class PlayerMovement : MonoBehaviour
     private void Jump(Vector3 moveDirection)
     {
         yGravity += Physics.gravity.y * Time.deltaTime;
+
+
+
+
+
         if (characterController.isGrounded)
         {
+
+
+
 
             yGravity = -0.1f;
             animator.SetBool(ANIMATION_IS_GROUNDED, true);
@@ -121,7 +132,7 @@ public class PlayerMovement : MonoBehaviour
             isJumping = false;
             animator.SetBool(ANIMATION_IS_FALLING, false);
 
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 // Set animation first - animator will process this before LateUpdate
                 animator.SetBool(ANIMATION_JUMPING, true);
@@ -135,12 +146,14 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = false;
 
 
-            bool isFallFromSky = isJumping && yGravity < 0;
+            bool isFallFromSky = isJumping;
             bool isFallFromGrounding = yGravity < -4f;
+
             if (isFallFromGrounding || isFallFromSky)
             {
                 animator.SetBool(ANIMATION_IS_FALLING, true);
             }
+
         }
 
         if (!isGrounded)
@@ -157,4 +170,8 @@ public class PlayerMovement : MonoBehaviour
         velocity.y = yGravity * Time.deltaTime;
         characterController.Move(velocity);
     }
+
+
+
+
 }
