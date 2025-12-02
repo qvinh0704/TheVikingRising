@@ -54,7 +54,8 @@ public class PlayerMovement : MonoBehaviour
         Run(moveDirection);
         Jump(moveDirection);
         TurnAround(moveDirection);
-        Attack();
+        // Attack();
+        ChopWood();
         Defend();
     }
 
@@ -115,16 +116,8 @@ public class PlayerMovement : MonoBehaviour
     {
         yGravity += Physics.gravity.y * Time.deltaTime;
 
-
-
-
-
         if (characterController.isGrounded)
         {
-
-
-
-
             yGravity = -0.1f;
             animator.SetBool(ANIMATION_IS_GROUNDED, true);
             isGrounded = true;
@@ -164,6 +157,19 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
+    private void ChopWood()
+    {
+        // ChopWood
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            animator.SetBool(ANIMATION_CHOPPING, true);
+        }
+        else
+        {
+            animator.SetBool(ANIMATION_CHOPPING, false);
+        }
+    }
     private void OnAnimatorMove()
     {
         Vector3 velocity = animator.deltaPosition;
